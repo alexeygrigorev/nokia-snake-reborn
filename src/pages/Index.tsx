@@ -9,7 +9,7 @@ import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
 
 const GRID_SIZE = 15;
-const INITIAL_SNAKE = [[7, 7]];
+const INITIAL_SNAKE = [[7, 7], [7, 6], [7, 5]]; // Changed to 3 squares
 const INITIAL_DIRECTION = [0, 1];
 const GAME_SPEED = 150;
 
