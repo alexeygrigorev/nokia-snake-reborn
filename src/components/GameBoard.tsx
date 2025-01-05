@@ -9,9 +9,9 @@ interface GameBoardProps {
 
 const GameBoard: React.FC<GameBoardProps> = ({ snake, food, gridSize }) => {
   return (
-    <div className="aspect-square w-full max-w-[400px] bg-nokia-bg p-1 rounded-lg">
+    <div className="aspect-square w-full max-w-[400px] bg-nokia-bg p-1 rounded-lg border-2 border-foreground">
       <div 
-        className="w-full h-full grid gap-[1px]"
+        className="w-full h-full grid gap-[1px] border border-foreground/20"
         style={{ 
           gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
         }}
@@ -26,7 +26,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ snake, food, gridSize }) => {
             <div
               key={index}
               className={cn(
-                "aspect-square",
+                "aspect-square border border-foreground/10",
                 isSnake && "bg-nokia-fg",
                 isFood && "bg-nokia-food animate-food-pulse"
               )}

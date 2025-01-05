@@ -3,6 +3,10 @@ import GameBoard from '@/components/GameBoard';
 import ScoreBoard from '@/components/ScoreBoard';
 import GameControls from '@/components/GameControls';
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTheme } from 'next-themes';
+import { Moon, Sun } from 'lucide-react';
 
 const GRID_SIZE = 15;
 const INITIAL_SNAKE = [[7, 7]];
@@ -16,6 +20,8 @@ const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
+  const [gameMode, setGameMode] = useState<'wrap' | 'wall'>('wrap');
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const generateFood = useCallback(() => {
@@ -53,10 +59,29 @@ const Index = () => {
     if (!isPlaying) return;
 
     const head = snake[0];
-    const newHead = [
-      (head[0] + direction[0] + GRID_SIZE) % GRID_SIZE,
-      (head[1] + direction[1] + GRID_SIZE) % GRID_SIZE,
+    let newHead = [
+      head[0] + direction[0],
+      head[1] + direction[1],
     ];
+
+    // Handle wall collision based on game mode
+    if (gameMode === 'wall') {
+      if (
+        newHead[0] < 0 ||
+        newHead[0] >= GRID_SIZE ||
+        newHead[1] < 0 ||
+        newHead[1] >= GRID_SIZE
+      ) {
+        gameOver();
+        return;
+      }
+    } else {
+      // Wrap around mode
+      newHead = [
+        (newHead[0] + GRID_SIZE) % GRID_SIZE,
+        (newHead[1] + GRID_SIZE) % GRID_SIZE,
+      ];
+    }
 
     // Check collision with self
     if (snake.some(([x, y]) => x === newHead[0] && y === newHead[1])) {
@@ -75,7 +100,7 @@ const Index = () => {
     }
 
     setSnake(newSnake);
-  }, [snake, direction, food, isPlaying, generateFood, gameOver]);
+  }, [snake, direction, food, isPlaying, generateFood, gameOver, gameMode]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -109,9 +134,31 @@ const Index = () => {
   }, [moveSnake]);
 
   return (
-    <div className="min-h-screen bg-nokia-bg flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="space-y-4 w-full max-w-[400px]">
-        <h1 className="text-nokia-fg text-2xl font-bold text-center mb-8">Nokia Snake</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-foreground text-2xl font-bold">Nokia Snake</h1>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={theme === 'dark'}
+              onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="border-2"
+            />
+            {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </div>
+        </div>
+        
+        <div className="flex justify-center mb-4">
+          <ToggleGroup type="single" value={gameMode} onValueChange={(value: 'wrap' | 'wall') => value && setGameMode(value)}>
+            <ToggleGroupItem value="wrap" aria-label="Wrap Mode">
+              Wrap Mode
+            </ToggleGroupItem>
+            <ToggleGroupItem value="wall" aria-label="Wall Mode">
+              Wall Mode
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
         <GameBoard snake={snake} food={food} gridSize={GRID_SIZE} />
         <div className="flex justify-between items-center">
           <ScoreBoard score={score} highScore={highScore} />
